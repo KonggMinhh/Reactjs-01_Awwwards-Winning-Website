@@ -1,16 +1,39 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { TiLocation } from "react-icons/ti";
-
+import { useWindowScroll } from "react-use";
 const navItems = ["Nexus", "Vault", "Prologue", "About", "Contact"];
 
 const Navbar = () => {
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const [isIndicatorActive, setIsIndicatorActive] = useState(false);
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [isNavVisible, setIsNavVisible] = useState(true);
 
     const navContainerRef = useRef(null);
     const audioElementRef = useRef(null);
-    const toggleAudioIndicator = () => {};
+
+    const { y: currentScrollY } = useWindowScroll();
+
+    useEffect(() => {
+        if (currentScrollY === 0) {
+            setIsNavVisible(true);
+            navContainerRef.current.classList.remove("floating-nav");
+        }
+    }, [currentScrollY]);
+
+    const toggleAudioIndicator = () => {
+        setIsAudioPlaying((prev) => !prev);
+        setIsIndicatorActive((prev) => !prev);
+    };
+
+    useEffect(() => {
+        if (isAudioPlaying) {
+            audioElementRef.current.play();
+        } else {
+            audioElementRef.current.pause();
+        }
+    }, [isAudioPlaying]);
 
     return (
         <div
@@ -49,7 +72,18 @@ const Navbar = () => {
                                 className="hidden"
                                 src="/audio/loop.mp3"
                                 loop
-                            ></audio>
+                            />
+                            {[1, 2, 3, 4].map((bar) => (
+                                <div
+                                    key={bar}
+                                    className={`indicator-line ${
+                                        isIndicatorActive ? "active" : ""
+                                    }`}
+                                    style={{
+                                        animationDelay: `${bar * 0.1}s`,
+                                    }}
+                                ></div>
+                            ))}
                         </button>
                     </div>
                 </nav>
